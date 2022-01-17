@@ -332,23 +332,31 @@ namespace WA2AD
             }
             */
 
-            // 1/13/22 - If the vaxx field isn't set, or is set to "Not Validated" we disable the member
-            var vaxx = getValueForKey(member, "2022 Covid Vaccine Policy Compliance");
-            if (vaxx.Value == null)
+            DayOfWeek dayOfWeek = DateTime.Today.DayOfWeek;
+            if ((dayOfWeek == DayOfWeek.Thursday) || (dayOfWeek == DayOfWeek.Friday))
             {
-                Log.Write(Log.Level.Warning, "(vaxx) We are explicitly disabling " + member.FirstName + " " + member.LastName);
-                shouldBeEnabled = false;
+                // 1/16/22 - If it's Thursday or Friday, the vaxx status isn't checked.
             }
-            else 
+            else
             {
-                JObject mksVal = JObject.Parse(vaxx.Value.ToString());
-
-                var isValidated = (string)mksVal.GetValue("Label");
-                if (isValidated == "Not Validated")                
+                // 1/13/22 - If the vaxx field isn't set, or is set to "Not Validated" we disable the member
+                var vaxx = getValueForKey(member, "2022 Covid Vaccine Policy Compliance");
+                if (vaxx.Value == null)
                 {
                     Log.Write(Log.Level.Warning, "(vaxx) We are explicitly disabling " + member.FirstName + " " + member.LastName);
                     shouldBeEnabled = false;
                 }
+                else 
+                {
+                    JObject mksVal = JObject.Parse(vaxx.Value.ToString());
+
+                    var isValidated = (string)mksVal.GetValue("Label");
+                    if (isValidated == "Not Validated")                
+                    {
+                        Log.Write(Log.Level.Warning, "(vaxx) We are explicitly disabling " + member.FirstName + " " + member.LastName);
+                        shouldBeEnabled = false;
+                    }
+                }    
             }
 
             // The member is disabled if the field is not null and explicitly
